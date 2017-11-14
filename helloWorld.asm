@@ -46,7 +46,7 @@ hextoDec:
 
 
 	#since character is between 0 and 9
-	addi $t1, $t1, -30
+	addi $t1, $t1, -48
 
 
 	j incrementChar
@@ -94,35 +94,35 @@ incrementChar:
 	j hextoDec
 
 addReg1:
-	addi $t3, $t1
+	addi $t3, $t1, 0
 	j hextoDec
 
 addReg2:
-	addi $t4, $t1
+	addi $t4, $t1, 0
 	j hextoDec
 
 addReg3:
-	addi $t5, $t1
+	addi $t5, $t1, 0
 	j hextoDec
 
 addReg4:
-	addi $t6, $t1
+	addi $t6, $t1, 0
 	j hextoDec
 
 addReg5:
-	addi $t7, $t1
+	addi $t7, $t1, 0
 	j hextoDec
 
 addReg6:
-	addi $t8, $t1
+	addi $t8, $t1, 0
 	j hextoDec
 
 addReg7:
-	addi $t9, $t1
+	addi $t9, $t1, 0
 	j hextoDec
 
 addReg8:
-	addi $s2, $t1
+	addi $s2, $t1,  0
 	j hextoDec
 
 ERROR:
@@ -130,12 +130,33 @@ ERROR:
 	li $v0, 4
 	la $a0, errorPrompt
 	syscall
+	j endProc
 
 convert:
 	beq $t2, 0, ERROR
 	bgt $t2, 8, ERROR
 
-	
+	beq $t2, 1, oneDigit
+	#beq $t2, 2, twoDigits
+	#beq $t2, 3, threeDigits
+	#beq $t2, 4, fourDigits
+	#beq $t2, 5, fiveDigits
+	#beq $t2, 6, sixDigits
+	#beq $t2, 7, sevenDigits
+	#beq $t2, 8, eightDigits
+
+
+#Compute the sums based on the number of digits input
+
+oneDigit:
+	addi $s4, $t3, 0	#$s4 will hold the sum
+	j endProc
+
+twoDigits:
+	addi $s5, $s5, 16
+	mult $t3, $s5
+	mflo $s4
+	add $s4, $s4, $t4
 
 endProc:
 	#endline
@@ -145,7 +166,7 @@ endProc:
 
 	#output the new string
 	li $v0, 4
-	la $a0, ($t0)
+	la $a0, ($s4)
 	syscall
 
 	li $v0, 10
