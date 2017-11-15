@@ -2,8 +2,8 @@
 
 	.data
 	eightDigitConv: .space 32
-	prompt1: .asciiz "\nEnter a string of up to 8 characters! 0-9, a-f, or A-F\n"
-	errorPrompt: .asciiz "Invalid hexadecimal number.\n"	
+
+	errorPrompt: .asciiz "Invalid hexadecimal number."	
 
 	in_string: .space 20
 	
