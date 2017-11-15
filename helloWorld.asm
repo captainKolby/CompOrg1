@@ -1,20 +1,16 @@
-	#PROGRAM: Hello, World!
+	#AUTHOR Kolby Lacy
 
 	.data
+	eightDigitConv: .space 32
 	prompt1: .asciiz "\nEnter a string of up to 8 characters! 0-9, a-f, or A-F\n"
 	errorPrompt: .asciiz "Invalid hexadecimal number.\n"	
 
 	in_string: .space 20
-	decimal: .space 1024
+	
 	endline: .asciiz "\n"
 
 	.text
 main:
-
-	#prompt for a string
-	li $v0, 4
-	la $a0, prompt1
-	syscall
 
 	#read in the string
 	li $v0, 8
@@ -22,21 +18,17 @@ main:
 	li $a1, 9
 	syscall
 
-	#endline
-	li $v0, 4
-	la $a0, endline	
-	syscall
 
-	la $t0, in_string
+	la $a0, in_string
 
 hextoDec:
 
 	#look at a character
-	lb $t1, 0($t0)
+	lb $t1, 0($a0)
 
 
-	beq $t1, 0, convert
-	beq $t1, 10, convert
+	beq $t1, 0, convert	#if null, done
+	beq $t1, 10, convert #if endline, done
 
 	slt $s0, $t1, 48 #check if less than 0
 	sgt $s1, $t1, 57 #check if greater than 9
@@ -46,7 +38,7 @@ hextoDec:
 
 
 	#since character is between 0 and 9
-	addi $t1, $t1, -48
+	addi $t0, $t1, -48
 
 
 	j incrementChar
@@ -63,7 +55,7 @@ checkCHex:
 	beq $s0, 1, ERROR #Not a hex digit
 	beq $s1, 1, checkLHex #checks if the number is a-f
 
-	addi $t1, $t1, -55
+	addi $t0, $t1, -55
 
 	j incrementChar
 
@@ -76,7 +68,7 @@ checkLHex:
 	beq $s0, 1, ERROR #Not a hex digit
 	beq $s1, 1, ERROR #not a hex digit
 
-	addi $t1, $t1, -87
+	addi $t0, $t1, -87
 	j incrementChar
 
 incrementChar:
@@ -90,74 +82,261 @@ incrementChar:
 	beq $t2, 6, addReg6
 	beq $t2, 7, addReg7
 	beq $t2, 8, addReg8
-	addi $t0, $t0, 1 #moves up the address to a new character
 	j hextoDec
 
 addReg1:
-	addi $t3, $t1, 0
+	addiu $t3, $t0, 0 #adds first read digit to $t3
+	addi $a0, $a0, 1 #moves up the address to a new character
 	j hextoDec
 
 addReg2:
-	addi $t4, $t1, 0
+	addi $t4, $t0, 0 #adds second read digit to $t4
+	addi $a0, $a0, 1 
 	j hextoDec
 
 addReg3:
-	addi $t5, $t1, 0
+	addi $t5, $t0, 0 #adds third read digit to $t5
+	addi $a0, $a0, 1  
 	j hextoDec
 
 addReg4:
-	addi $t6, $t1, 0
+	addi $t6, $t0, 0 #adds fourth read digit to $t6
+	addi $a0, $a0, 1  
 	j hextoDec
 
 addReg5:
-	addi $t7, $t1, 0
+	addi $t7, $t0, 0 #adds fifth read digit to $t7
+	addi $a0, $a0, 1  
 	j hextoDec
 
 addReg6:
-	addi $t8, $t1, 0
+	addi $t8, $t0, 0 #adds sixth read digit to $t8
+	addi $a0, $a0, 1  
 	j hextoDec
 
 addReg7:
-	addi $t9, $t1, 0
+	addi $t9, $t0, 0 #adds seventh read digit to $t9
+	addi $a0, $a0, 1  
 	j hextoDec
 
 addReg8:
-	addi $s2, $t1,  0
+	addi $s2, $t0,  0 #adds eighth read digit to $s2
+	addi $a0, $a0, 1  
 	j hextoDec
 
-ERROR:
+ERROR:	#prints the error message
+	#endline
+	li $v0, 4
+	la $a0, endline	
+	syscall
 
 	li $v0, 4
 	la $a0, errorPrompt
 	syscall
-	j endProc
+
+	#endline
+	li $v0, 4
+	la $a0, endline	
+	syscall
+
+	li $v0, 10
+	syscall
+	
 
 convert:
 	beq $t2, 0, ERROR
 	bgt $t2, 8, ERROR
 
-	beq $t2, 1, oneDigit
-	#beq $t2, 2, twoDigits
-	#beq $t2, 3, threeDigits
-	#beq $t2, 4, fourDigits
-	#beq $t2, 5, fiveDigits
-	#beq $t2, 6, sixDigits
-	#beq $t2, 7, sevenDigits
-	#beq $t2, 8, eightDigits
+	beq $t2, 1, oneDigit		#conversion for a one digit input string 
+	beq $t2, 2, twoDigits		#conversion for a two digit input string 
+	beq $t2, 3, threeDigits 	#conversion for a three digit input string 
+	beq $t2, 4, fourDigits  	#conversion for a four digit input string 
+	beq $t2, 5, fiveDigits  	#conversion for a five digit input string 
+	beq $t2, 6, sixDigits   	#conversion for a six digit input string 
+	beq $t2, 7, sevenDigits 	#conversion for a seven digit input string 
+	beq $t2, 8, eightDigits 	#conversion for an eight digit input string 
 
 
 #Compute the sums based on the number of digits input
 
-oneDigit:
+oneDigit: #puts the sum of the digit in $s4
 	addi $s4, $t3, 0	#$s4 will hold the sum
 	j endProc
 
-twoDigits:
+twoDigits: #num1*16^1 + num2*16^0
 	addi $s5, $s5, 16
-	mult $t3, $s5
+	multu $t3, $s5
 	mflo $s4
-	add $s4, $s4, $t4
 
+	addu $s4, $s4, $t4
+	j endProc
+
+threeDigits: #num1*16^2 +... + num3*16^0
+	li $s5, 256
+	multu $t3, $s5
+	mflo $s4
+
+	li $s5, 16
+	multu $t4, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	addu $s4, $s4, $t5
+
+	j endProc
+
+fourDigits: #num1*16^3 +... + num4*16^0
+
+	li $s5, 4096
+	multu $t3, $s5
+	mflo $s4
+
+	li $s5, 256
+	multu $t4, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	li $s5, 16
+	multu $t5, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	addu $s4, $s4, $t6
+
+	j endProc
+
+fiveDigits: #num1*16^4 +... + num5*16^0
+	li $s5, 65536
+	multu $t3, $s5
+	mflo $s4
+
+	li $s5, 4096
+	multu $t4, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+
+	li $s5, 256
+	multu $t5, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	li $s5, 16
+	multu $t6, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	addu $s4, $s4, $t7
+
+	j endProc
+
+sixDigits: #num1*16^5 +... + num6*16^0
+	li $s5, 1048576
+	multu $t3, $s5
+	mflo $s4
+
+	li $s5, 65536
+	multu $t4, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	li $s5, 4096
+	multu $t5, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+
+	li $s5, 256
+	multu $t6, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	li $s5, 16
+	multu $t7, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	addu $s4, $s4, $t8
+
+	j endProc
+
+sevenDigits: #num1*16^6 +... + num7*16^0
+	li $s5, 16777216
+	multu $t3, $s5
+	mflo $s4
+
+	li $s5, 1048576
+	multu $t4, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	li $s5, 65536
+	multu $t5, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	li $s5, 4096
+	multu $t6, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+
+	li $s5, 256
+	multu $t7, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	li $s5, 16
+	multu $t8, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	addu $s4, $s4, $t9
+
+	j endProc
+
+eightDigits: #num1*16^7 +... + num8*16^0
+
+	li $s5, 268435456
+	multu $t3, $s5 #puts a negative number in LO for some reason
+	mflo $s4
+
+	li $s5, 16777216
+	multu $t4, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	li $s5, 1048576
+	multu $t5, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	li $s5, 65536
+	mult $t6, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	li $s5, 4096
+	multu $t7, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+
+	li $s5, 256
+	multu $t8, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	li $s5, 16
+	multu $t9, $s5
+	mflo $s6
+	addu $s4, $s4, $s6
+
+	addu $s4, $s4, $s2
+
+
+	j endProc
+	
 endProc:
 	#endline
 	li $v0, 4
@@ -165,8 +344,13 @@ endProc:
 	syscall
 
 	#output the new string
+	li $v0, 1
+	addu $a0, $s4, $zero
+	syscall
+
+	#endline
 	li $v0, 4
-	la $a0, ($s4)
+	la $a0, endline	
 	syscall
 
 	li $v0, 10
